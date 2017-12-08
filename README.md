@@ -36,4 +36,4 @@
 
 ##### 并发
 1. goroutine
-
+2. channel
