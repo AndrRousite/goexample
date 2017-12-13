@@ -22,3 +22,6 @@
 *.iml
 out
 gen
+
+file/*
+projectFilesBackup
