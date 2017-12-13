@@ -26,6 +26,7 @@ import (
 	"encoding/xml"
 	"encoding/json"
 	"github.com/bitly/go-simplejson"
+	"regexp"
 )
 
 func main() {
@@ -80,6 +81,7 @@ func main() {
 	http.HandleFunc("/cookie", setCookie)
 	http.HandleFunc("/unique", unique)
 	http.HandleFunc("/count", count)
+	http.HandleFunc("/regexp", match)
 
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {
@@ -363,6 +365,21 @@ func parseJson() {
 	js, err := simplejson.NewJson(b)
 	checkError(err)
 	fmt.Println(js.Get("Name1").MustString())
+}
+
+func match(w http.ResponseWriter, r *http.Request) {
+	s := r.FormValue("value")
+	var arg string
+	if s == "" {
+		arg = ""
+	} else if m, _ := regexp.MatchString("^[0-9]+$", s); m {
+		arg = "数字"
+	} else if m, _ := regexp.MatchString("^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$", s); m {
+		arg = "IP"
+	}
+	t, err := template.ParseFiles("regexp.gtpl")
+	checkError(err)
+	t.Execute(w, arg)
 }
 
 func checkError(err error) {
