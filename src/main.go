@@ -3,7 +3,6 @@ package main
 import "fmt"
 import (
 	"math/rand"
-	"math"
 	"net/http"
 	"strings"
 	"log"
@@ -27,71 +26,100 @@ import (
 	"encoding/json"
 	"github.com/bitly/go-simplejson"
 	"regexp"
+	"golang.org/x/net/websocket"
 )
 
 func main() {
-	fmt.Println("Hello World.")
-	num := 0
-	for i := 0; i < 10; i++ {
-		fmt.Println("i = ", i, "----", rand.Intn(10))
-		num += i
-		if num%3 == 0 {
-			fmt.Println("======================")
-		} else if num%3 == 1 {
-			fmt.Println("**********************")
-		} else {
-			fmt.Println("######################")
-		}
-	}
-	fmt.Println(math.Pi)
+	//fmt.Println("Hello World.")
+	//num := 0
+	//for i := 0; i < 10; i++ {
+	//	fmt.Println("i = ", i, "----", rand.Intn(10))
+	//	num += i
+	//	if num%3 == 0 {
+	//		fmt.Println("======================")
+	//	} else if num%3 == 1 {
+	//		fmt.Println("**********************")
+	//	} else {
+	//		fmt.Println("######################")
+	//	}
+	//}
+	//fmt.Println(math.Pi)
+	//
+	//v := Person{}
+	//v.Name = "张三"
+	//
+	//fmt.Println(v.Name)
+	//
+	//s := &v
+	//
+	//fmt.Println(s)
+	//
+	//a := make([]string, 10)
+	//fmt.Println(a)
+	//
+	//var pow = []string{"刘枫", "张飒", "李斯", "王屋"}
+	//
+	//for v := range pow {
+	//	fmt.Printf("s = %s\n", pow[v])
+	//}
+	//
+	//t := time.Date(1994, time.July, 14, 2, 0, 0, 0, time.Local)
+	//
+	//fmt.Printf("您的出生日期为： %s ", t)
+	//
+	////openMYSQL()
+	////test, err := get("test")
+	////fmt.Println(test, err)
+	//
+	////parseXML()
+	//parseJson()
+	//
+	//mould()
+	//
+	////makeFile()
+	//
+	//strconvString()
+	//
+	//http.HandleFunc("/hello", hello)
+	//http.HandleFunc("/login", login)
+	//http.HandleFunc("/upload", upload)
+	//
+	//http.HandleFunc("/cookie", setCookie)
+	//http.HandleFunc("/unique", unique)
+	//http.HandleFunc("/count", count)
+	//http.HandleFunc("/regexp", match)
+	//http.HandleFunc("/reptile", reptile)
+	//
+	//err := http.ListenAndServe(":9090", nil)
+	//if err != nil {
+	//	log.Fatal("Error:", err)
+	//}
 
-	v := Person{"刘枫", "xxx"}
-	v.Name = "张三"
+	//if len(os.Args) != 2 {
+	//	fmt.Fprintf(os.Stderr, "Usage: %s ip-addr\n", os.Args[0])
+	//	os.Exit(1)
+	//}
+	//name := os.Args[1]
+	//addr := net.ParseIP(name)
+	//if addr == nil {
+	//	fmt.Println("Invalid address")
+	//} else {
+	//	fmt.Println("The address is ", addr.String())
+	//}
+	//os.Exit(0)
 
-	fmt.Println(v.Name)
+	//http.Handle("/", websocket.Handler(receiver))
+	//if err := http.ListenAndServe(":1234", nil); err != nil {
+	//	log.Fatal("ListenAndServe:", err)
+	//}
 
-	s := &v
-
-	fmt.Println(s)
-
-	a := make([]string, 10)
-	fmt.Println(a)
-
-	var pow = []string{"刘枫", "张飒", "李斯", "王屋"}
-
-	for v := range pow {
-		fmt.Printf("s = %s\n", pow[v])
-	}
-
-	t := time.Date(1994, time.July, 14, 2, 0, 0, 0, time.Local)
-
-	fmt.Printf("您的出生日期为： %s ", t)
-
-	//openMYSQL()
-	//test, err := get("test")
-	//fmt.Println(test, err)
-
-	//parseXML()
-	parseJson()
-
-	http.HandleFunc("/hello", hello)
-	http.HandleFunc("/login", login)
-	http.HandleFunc("/upload", upload)
-
-	http.HandleFunc("/cookie", setCookie)
-	http.HandleFunc("/unique", unique)
-	http.HandleFunc("/count", count)
-	http.HandleFunc("/regexp", match)
-
-	err := http.ListenAndServe(":9090", nil)
-	if err != nil {
-		log.Fatal("Error:", err)
-	}
+	timeParse()
 }
 
 type Person struct {
 	Name   string
 	Avatar string
+	Email  string
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {
@@ -380,6 +408,136 @@ func match(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("regexp.gtpl")
 	checkError(err)
 	t.Execute(w, arg)
+}
+
+/**
+爬一爬百度
+ */
+func reptile(w http.ResponseWriter, r *http.Request) {
+	var url string
+	if len(r.FormValue("url")) > 0 {
+		url = r.FormValue("url")
+	} else {
+		url = "http://www.baidu.com"
+	}
+	resp, err := http.Get(url)
+	checkError(err)
+	defer resp.Body.Close()
+	// 读取数据
+	body, err := ioutil.ReadAll(resp.Body)
+	checkError(err)
+
+	html := string(body)
+
+	// 获取到html标签，全部转换为小写
+	re, _ := regexp.Compile("\\<[\\S\\s]+?\\>")
+	html = re.ReplaceAllStringFunc(html, strings.ToLower)
+
+	// 去除style
+	re, _ = regexp.Compile("\\<style[\\S\\s]+?\\</style\\>")
+	html = re.ReplaceAllString(html, "")
+
+	// 去除script
+	re, _ = regexp.Compile("\\<script[\\S\\s]+?\\</script\\>")
+	html = re.ReplaceAllString(html, "")
+
+	// 将display:none 去除
+	//html = strings.Replace(html, "display:none;", "", -1)
+
+	// 去除所有尖括号中的代码,并换成换行符
+	re, _ = regexp.Compile("\\<[\\S\\s]+?\\>")
+	html = re.ReplaceAllString(html, "\n")
+
+	// 去除连续的换行符
+	re, _ = regexp.Compile("\\s{2,}")
+	html = re.ReplaceAllString(html, "\n")
+
+	// 试试错误的表达式
+	re = regexp.MustCompile("\\$")
+	html = re.ReplaceAllString(html, "XXXXXXXXXXXXXXXX")
+
+	fmt.Fprint(w, html)
+}
+
+type Friend struct {
+	Fname string
+}
+
+type User struct {
+	UserName string
+	Emails   []string
+	Friends  []*Friend
+}
+
+func mould() {
+	//t := template.New("test")
+	//t.Parse("Hello {{.Name}} {{.Email}}")
+	//p := Person{Name: "liufeng", Email: "123456@qq.com"}
+	//t.Execute(os.Stdout, p)
+
+	f1 := Friend{Fname: "minux.ma"}
+	f2 := Friend{Fname: "xushiwei"}
+	t := template.New("fieldname example")
+	t, _ = t.Parse(`hello {{.UserName}}!
+			{{range .Emails}}
+				an email {{.}}
+			{{end}}
+			{{with .Friends}}
+			{{range .}}
+				my friend name is {{.Fname}}
+			{{end}}
+			{{end}}
+			`)
+	p := User{UserName: "Astaxie",
+		Emails: []string{"astaxie@beego.me", "astaxie@gmail.com"},
+		Friends: []*Friend{&f1, &f2}}
+	t.Execute(os.Stdout, p)
+}
+
+func makeFile() {
+	err := os.Mkdir("dir", 0777)
+	checkError(err)
+	err = os.MkdirAll("dir/test1/test2", 0777)
+	checkError(err)
+	fmt.Println("创建成功")
+	//os.RemoveAll("dir")
+}
+
+func strconvString() {
+	str := make([]byte, 0, 100)
+	str = strconv.AppendInt(str, 4567, 10)
+	str = strconv.AppendBool(str, false)
+	str = strconv.AppendQuote(str, "abcdefg")
+	str = strconv.AppendQuoteRune(str, '单')
+	fmt.Println(string(str))
+}
+
+func receiver(ws *websocket.Conn) {
+	var err error
+	for {
+		var reply string
+		if err = websocket.Message.Receive(ws, &reply); err != nil {
+			fmt.Println("Can't receive")
+			break
+		}
+
+		fmt.Println("Received back from client: " + reply)
+
+		fmt.Println("Sending to client:" + reply)
+
+		if err = websocket.Message.Send(ws, reply); err != nil {
+			fmt.Println("Can't send")
+			break
+		}
+	}
+}
+
+func timeParse() {
+	loc, _ := time.LoadLocation("Asia/Shanghai")
+	t := time.Now()
+	t = t.In(loc)
+	// 这个是什么鬼？
+	fmt.Println(t.Format("2006-01-02 15:04:05"))
 }
 
 func checkError(err error) {
