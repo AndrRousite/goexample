@@ -27,6 +27,7 @@ import (
 	"github.com/bitly/go-simplejson"
 	"regexp"
 	"golang.org/x/net/websocket"
+	"./hello"
 )
 
 func main() {
@@ -112,6 +113,8 @@ func main() {
 	//if err := http.ListenAndServe(":1234", nil); err != nil {
 	//	log.Fatal("ListenAndServe:", err)
 	//}
+
+	hh.Hello()
 
 	timeParse()
 }
